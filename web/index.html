@@ -1,0 +1,386 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Shelf">
+<meta name="theme-color" content="#16130f">
+<link rel="apple-touch-icon" href="/icon.png">
+<link rel="manifest" href="/manifest.webmanifest">
+<title>The Shelf Lite</title>
+<style>
+:root{
+  --bg:#16130f; --bg2:#1f1b16; --card:#26211b; --line:#3a3229; --ink:#f3ebdf; --mute:#a99c8a;
+  --accent:#e8a33d; --accent2:#c9772b; --good:#7fbf7f; --bad:#e46a5a;
+  --r:14px; --safe-b:env(safe-area-inset-bottom,0px); --safe-t:env(safe-area-inset-top,0px);
+  font-family: ui-rounded, -apple-system, "SF Pro Rounded", system-ui, "Segoe UI", Roboto, sans-serif;
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: light){
+  :root{ --bg:#f6f0e6; --bg2:#efe6d8; --card:#fffaf2; --line:#e0d4c2; --ink:#2b241c; --mute:#7d6f5d; --accent:#c97a14; --accent2:#a85d0c; color-scheme: light; }
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--ink)}
+body{min-height:100vh;padding-bottom:calc(140px + var(--safe-b))}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+header{position:sticky;top:0;z-index:5;background:linear-gradient(var(--bg) 80%,transparent);padding:calc(14px + var(--safe-t)) 16px 10px}
+.brand{display:flex;align-items:baseline;gap:8px}
+.brand h1{margin:0;font-size:22px;letter-spacing:.3px}
+.brand h1 b{color:var(--accent)}
+.brand small{color:var(--mute);font-size:13px}
+.shelfline{height:6px;border-radius:3px;background:var(--line);margin-top:10px;overflow:hidden}
+.shelfline i{display:block;height:100%;background:linear-gradient(90deg,var(--accent2),var(--accent));width:0;transition:width .6s}
+.storage{display:flex;justify-content:space-between;font-size:12px;color:var(--mute);margin-top:5px}
+main{padding:0 16px;max-width:760px;margin:0 auto}
+.view{display:none}.view.on{display:block}
+.banner{background:var(--accent);color:#1b1207;border-radius:var(--r);padding:12px 14px;margin:6px 0 14px;font-weight:600;display:none}
+.banner button{background:#1b1207;color:var(--accent);border:0;border-radius:999px;padding:6px 12px;margin-left:8px;font-weight:700}
+.row{display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:12px}
+.list{background:var(--card);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.list .row+.row{border-top:1px solid var(--line);border-radius:0}
+.row:active{background:var(--bg2)}
+.ico{width:36px;height:36px;border-radius:9px;display:grid;place-items:center;flex:none;background:var(--bg2);font-size:18px}
+.ico.dir{background:#4a3a24;color:var(--accent)}
+.meta{flex:1;min-width:0}
+.meta .n{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:15px}
+.meta .s{font-size:12px;color:var(--mute);margin-top:2px}
+.more{border:0;background:none;color:var(--mute);font-size:22px;padding:4px 8px}
+.crumbs{display:flex;gap:4px;flex-wrap:wrap;align-items:center;margin:4px 0 10px;font-size:14px}
+.crumbs button{border:0;background:var(--bg2);border-radius:999px;padding:5px 11px;color:var(--ink)}
+.crumbs span{color:var(--mute)}
+.empty{color:var(--mute);text-align:center;padding:36px 12px;font-size:14px}
+.tools{display:flex;gap:8px;margin:0 0 12px}
+.btn{border:1px solid var(--line);background:var(--card);border-radius:999px;padding:9px 14px;font-size:14px;font-weight:600}
+.btn.pri{background:var(--accent);border-color:var(--accent);color:#1b1207}
+.btn.bad{color:var(--bad)}
+.search{width:100%;border:1px solid var(--line);background:var(--card);border-radius:999px;padding:10px 14px;margin-bottom:10px;font-size:15px}
+.seg{display:flex;background:var(--bg2);border-radius:999px;padding:3px;margin-bottom:12px}
+.seg button{flex:1;border:0;background:none;border-radius:999px;padding:8px;font-size:14px;font-weight:600;color:var(--mute)}
+.seg button.on{background:var(--card);color:var(--ink);box-shadow:0 1px 3px #0004}
+.group{font-size:12px;text-transform:uppercase;letter-spacing:.8px;color:var(--mute);margin:16px 4px 6px}
+.track.now .meta .n{color:var(--accent);font-weight:700}
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:6;display:flex;background:var(--bg2);border-top:1px solid var(--line);padding:6px 6px calc(6px + var(--safe-b))}
+.tabs button{flex:1;border:0;background:none;color:var(--mute);font-size:11px;padding:4px 0;display:flex;flex-direction:column;align-items:center;gap:2px}
+.tabs button svg{width:24px;height:24px}
+.tabs button.on{color:var(--accent)}
+.player{position:fixed;left:8px;right:8px;bottom:calc(64px + var(--safe-b));z-index:6;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:10px 12px;box-shadow:0 8px 24px #0006;display:none}
+.player.on{display:block}
+.pl-top{display:flex;align-items:center;gap:10px}
+.pl-top .meta .n{font-weight:700}
+.pl-btn{border:0;background:none;font-size:20px;width:38px;height:38px;border-radius:50%;display:grid;place-items:center}
+.pl-btn.big{background:var(--accent);color:#1b1207}
+.bar{height:4px;background:var(--line);border-radius:2px;margin-top:9px;position:relative;touch-action:none}
+.bar i{position:absolute;left:0;top:0;bottom:0;background:var(--accent);border-radius:2px;width:0}
+.times{display:flex;justify-content:space-between;font-size:11px;color:var(--mute);margin-top:4px}
+.vol{display:flex;align-items:center;gap:8px;margin-top:8px;font-size:13px;color:var(--mute)}
+.vol input{flex:1;accent-color:var(--accent)}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px}
+.note{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:12px;position:relative;word-wrap:break-word}
+.note h3{margin:0 26px 6px 0;font-size:15px}
+.note p{margin:0;font-size:14px;white-space:pre-wrap;color:var(--ink)}
+.note a{color:var(--accent);word-break:break-all}
+.note .x{position:absolute;top:6px;right:6px;border:0;background:none;color:var(--mute);font-size:18px}
+.note .when{font-size:11px;color:var(--mute);margin-top:8px}
+.compose{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:12px;margin-bottom:12px}
+.compose input,.compose textarea{width:100%;border:0;background:none;outline:none;font:inherit;color:inherit;resize:vertical}
+.compose input{font-weight:700;font-size:15px;margin-bottom:6px}
+.compose textarea{min-height:60px;font-size:14px}
+.kv{display:flex;justify-content:space-between;padding:11px 14px;font-size:14px;gap:10px}
+.kv span:first-child{color:var(--mute)}
+.kv span:last-child{text-align:right;word-break:break-all}
+.list .kv+.kv{border-top:1px solid var(--line)}
+h2{font-size:13px;text-transform:uppercase;letter-spacing:.8px;color:var(--mute);margin:22px 4px 8px;font-weight:700}
+.field{display:flex;gap:8px}
+.field input{flex:1;border:1px solid var(--line);background:var(--card);border-radius:12px;padding:10px 12px}
+.switch{display:flex;justify-content:space-between;align-items:center;padding:11px 14px}
+.switch input{width:46px;height:28px;accent-color:var(--accent)}
+.sheet-bg{position:fixed;inset:0;background:#0008;z-index:20;display:none;align-items:flex-end;justify-content:center}
+.sheet-bg.on{display:flex}
+.sheet{background:var(--bg2);width:100%;max-width:520px;border-radius:20px 20px 0 0;padding:14px 14px calc(14px + var(--safe-b));max-height:85vh;overflow:auto}
+.sheet h4{margin:4px 4px 12px;font-size:16px;word-break:break-all}
+.sheet .opt{display:block;width:100%;text-align:left;border:0;background:var(--card);border-radius:12px;padding:13px 14px;margin-bottom:8px;font-size:15px}
+.sheet img,.sheet video{max-width:100%;border-radius:12px;display:block;margin:0 auto 10px}
+.sheet pre{white-space:pre-wrap;font-size:13px;background:var(--card);padding:12px;border-radius:12px;max-height:50vh;overflow:auto}
+.toast{position:fixed;left:50%;transform:translateX(-50%);top:calc(14px + var(--safe-t));z-index:30;background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:999px;font-size:14px;font-weight:600;opacity:0;transition:opacity .25s;pointer-events:none;max-width:90vw;text-align:center}
+.toast.on{opacity:1}
+.uploads{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:10px 12px;margin-bottom:12px;display:none;font-size:13px}
+.uploads.on{display:block}
+.uploads .bar{margin:6px 0 2px}
+.drop{outline:2px dashed var(--accent);outline-offset:4px;border-radius:var(--r)}
+.net{display:flex;justify-content:space-between;width:100%;border:0;background:none;padding:11px 14px;font-size:15px;text-align:left}
+.list .net+.net{border-top:1px solid var(--line)}
+.net span:last-child{color:var(--mute);font-size:13px}
+.tip{font-size:13px;color:var(--mute);line-height:1.5;padding:4px 4px 0}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand"><h1>The <b>Shelf</b> <span style="font-weight:400;color:var(--mute)">lite</span></h1><small id="boardName"></small></div>
+  <div class="shelfline"><i id="useBar"></i></div>
+  <div class="storage"><span id="useText">…</span><span id="storeKind"></span></div>
+</header>
+
+<main>
+  <div class="banner" id="apBanner">Setup mode: connect me to your home Wi-Fi <button onclick="go('device')">Set up</button></div>
+
+  <!-- FILES -->
+  <section class="view on" id="v-files">
+    <div class="tools">
+      <button class="btn pri" onclick="pick.click()">⬆ Upload</button>
+      <button class="btn" onclick="newFolder()">＋ Folder</button>
+    </div>
+    <input type="file" id="pick" multiple hidden>
+    <div class="uploads" id="uploads"><div id="upName">Uploading…</div><div class="bar"><i id="upBar"></i></div><div class="times"><span id="upCount"></span><span id="upSpeed"></span></div></div>
+    <div class="crumbs" id="crumbs"></div>
+    <div class="list" id="files"></div>
+  </section>
+
+  <!-- MUSIC -->
+  <section class="view" id="v-music">
+    <div class="seg" id="outSeg" style="display:none">
+      <button data-out="phone" class="on" onclick="setOut('phone')">▶ This device</button>
+      <button data-out="spk" onclick="setOut('spk')">🔊 Shelf speaker</button>
+    </div>
+    <input class="search" id="q" placeholder="Search songs or folders" autocomplete="off">
+    <div id="music"></div>
+  </section>
+
+  <!-- BOARD -->
+  <section class="view" id="v-board">
+    <div class="compose">
+      <input id="nTitle" placeholder="Title (optional)">
+      <textarea id="nText" placeholder="Write a note or paste a link…"></textarea>
+      <div style="display:flex;justify-content:flex-end"><button class="btn pri" onclick="addNote()">Pin to board</button></div>
+    </div>
+    <div class="cards" id="cards"></div>
+  </section>
+
+  <!-- DEVICE -->
+  <section class="view" id="v-device">
+    <h2>This Shelf</h2>
+    <div class="list" id="info"></div>
+
+    <h2>Wi-Fi</h2>
+    <div class="list">
+      <div class="kv"><span>Connected to</span><span id="wNow">—</span></div>
+    </div>
+    <div class="tools" style="margin-top:10px">
+      <button class="btn pri" onclick="scan()">Find networks</button>
+      <button class="btn bad" onclick="forget()">Forget Wi-Fi</button>
+    </div>
+    <div class="list" id="nets" style="display:none"></div>
+
+    <h2>Name on the network</h2>
+    <div class="field"><input id="hostIn" autocapitalize="off" autocorrect="off" spellcheck="false"><button class="btn pri" onclick="saveHost()">Save</button></div>
+    <p class="tip">Open the Shelf at <b id="hostShow"></b>. Give each board its own name (like <i>shelf-kitchen</i>).</p>
+
+    <h2>Speaker</h2>
+    <div class="list"><label class="switch"><span>MAX98357A speaker is wired up</span><input type="checkbox" id="spkOn" onchange="saveSpk()"></label></div>
+    <p class="tip">Wires: BCLK → GPIO39, LRC → GPIO41, DIN → GPIO38, VIN → 3V3 (or 5V), GND → GND. The speaker plays MP3 and WAV files.</p>
+
+    <h2>Tools</h2>
+    <div class="tools" style="flex-wrap:wrap">
+      <button class="btn" onclick="rescan()">Rescan music</button>
+      <button class="btn" onclick="reboot()">Restart</button>
+    </div>
+    <p class="tip">On iPhone: tap Share → <b>Add to Home Screen</b> to get a Shelf app icon. Hold the board's PRG button for 6 seconds to forget Wi-Fi.</p>
+  </section>
+</main>
+
+<!-- mini player -->
+<div class="player" id="player">
+  <div class="pl-top">
+    <div class="ico" id="plIco">♪</div>
+    <div class="meta"><div class="n" id="plTitle">—</div><div class="s" id="plSub"></div></div>
+    <button class="pl-btn" onclick="prev()">⏮</button>
+    <button class="pl-btn big" id="plPlay" onclick="toggle()">▶</button>
+    <button class="pl-btn" onclick="next()">⏭</button>
+  </div>
+  <div id="plPhone"><div class="bar" id="seek"><i id="plBar"></i></div><div class="times"><span id="tCur">0:00</span><span id="tDur">0:00</span></div></div>
+  <div class="vol" id="plSpk" style="display:none"><span>🔈</span><input type="range" min="0" max="100" id="vol"><span>🔊</span><button class="pl-btn" onclick="spk('stop')" title="Stop">⏹</button></div>
+</div>
+<audio id="audio" preload="metadata" playsinline></audio>
+
+<nav class="tabs">
+  <button data-v="files" class="on" onclick="go('files')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 7h18M3 12h18M3 17h18"/><path d="M6 4v3M18 9v3M10 14v3"/></svg>Files</button>
+  <button data-v="music" onclick="go('music')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></svg>Music</button>
+  <button data-v="board" onclick="go('board')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>Board</button>
+  <button data-v="device" onclick="go('device')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M9 6h6M12 18h.01"/></svg>Device</button>
+</nav>
+
+<div class="sheet-bg" id="sheetBg" onclick="if(event.target===this)closeSheet()"><div class="sheet" id="sheet"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt=b=>b>=1e9?(b/1e9).toFixed(1)+' GB':b>=1e6?(b/1e6).toFixed(1)+' MB':b>=1e3?Math.round(b/1e3)+' KB':b+' B';
+const tm=s=>{if(!isFinite(s))return'0:00';s=Math.floor(s);return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')};
+const ext=n=>(n.split('.').pop()||'').toLowerCase();
+const fileURL=(p,dl)=>'/f?p='+encodeURIComponent(p)+(dl?'&dl=1':'');
+let INFO={}, cwd='/', MUSIC=[], OUT='phone', Q=[], QI=-1, SPK={state:0};
+
+function toast(t){const e=$('#toast');e.textContent=t;e.classList.add('on');clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove('on'),2600)}
+async function api(path,opts){const r=await fetch(path,opts);let j={};try{j=await r.json()}catch(e){}if(!r.ok||j.ok===false)throw new Error(j.error||('error '+r.status));return j}
+const post=(path,data)=>api(path,{method:'POST',body:new URLSearchParams(data||{})});
+
+function go(v){document.querySelectorAll('.view').forEach(e=>e.classList.toggle('on',e.id==='v-'+v));
+  document.querySelectorAll('.tabs button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));
+  try{localStorage.setItem('tab',v)}catch(e){}
+  if(v==='music')loadMusic(); if(v==='board')loadBoard(); if(v==='device')renderInfo(); window.scrollTo(0,0)}
+
+// ---------- info ----------
+async function loadInfo(){try{INFO=await api('/api/info')}catch(e){return}
+  $('#boardName').textContent=INFO.board;
+  const pct=INFO.total?INFO.used/INFO.total*100:0;$('#useBar').style.width=pct.toFixed(1)+'%';
+  $('#useText').textContent=fmt(INFO.total-INFO.used)+' free of '+fmt(INFO.total);
+  $('#storeKind').textContent=INFO.sd?'microSD':'board flash';
+  $('#apBanner').style.display=INFO.ap&&!INFO.ssid?'block':'none';
+  $('#outSeg').style.display=INFO.speaker?'flex':'none'; if(!INFO.speaker&&OUT==='spk')setOut('phone');
+  if($('#v-device').classList.contains('on'))renderInfo()}
+function renderInfo(){const i=INFO;if(!i.board)return;
+  const up=i.uptime>86400?Math.floor(i.uptime/86400)+'d '+Math.floor(i.uptime%86400/3600)+'h':Math.floor(i.uptime/3600)+'h '+Math.floor(i.uptime%3600/60)+'m';
+  const rows=[['Board',i.board],['Firmware','v'+i.fw],['Storage',i.storage+' · '+fmt(i.total)],['Used',fmt(i.used)],['Songs',i.scanning?'scanning…':i.songs],['Address',i.ip],['Name',i.host+'.local'],['Up for',up],['Free memory',fmt(i.heap)]];
+  $('#info').innerHTML=rows.map(r=>`<div class="kv"><span>${r[0]}</span><span>${esc(r[1])}</span></div>`).join('');
+  $('#wNow').textContent=i.ssid?i.ssid+' ('+i.rssi+' dBm)':(i.ap?'Not yet: setup hotspot '+i.apName:'—');
+  if(document.activeElement!==$('#hostIn'))$('#hostIn').value=i.host;$('#hostShow').textContent='http://'+i.host+'.local';
+  $('#spkOn').checked=!!i.speaker}
+
+// ---------- files ----------
+const ICON={dir:'📁',mp3:'🎵',m4a:'🎵',wav:'🎵',flac:'🎵',aac:'🎵',ogg:'🎵',jpg:'🖼',jpeg:'🖼',png:'🖼',gif:'🖼',webp:'🖼',heic:'🖼',mp4:'🎬',mov:'🎬',m4v:'🎬',pdf:'📕',zip:'🗜',txt:'📝',md:'📝',json:'📝'};
+async function loadFiles(p){if(p!==undefined)cwd=p;let j;
+  try{j=await api('/api/list?path='+encodeURIComponent(cwd))}catch(e){if(cwd!=='/'){cwd='/';return loadFiles()}toast(e.message);return}
+  const parts=cwd.split('/').filter(Boolean);let acc='';
+  $('#crumbs').innerHTML=`<button onclick="loadFiles('/')">Shelf</button>`+parts.map(x=>{acc+='/'+x;return `<span>›</span><button onclick='loadFiles(${JSON.stringify(acc)})'>${esc(x)}</button>`}).join('');
+  const items=j.items.sort((a,b)=>b.d-a.d||a.n.localeCompare(b.n,undefined,{numeric:true}));
+  if(!items.length){$('#files').innerHTML=`<div class="empty">Nothing here yet.<br>Tap <b>Upload</b> to add files${cwd==='/'?', or make a <b>Music</b> folder for your songs':''}.</div>`;return}
+  $('#files').innerHTML=items.map(it=>{const full=(cwd==='/'?'':cwd)+'/'+it.n;const e=ext(it.n);
+    return `<div class="row" data-p="${esc(full)}" data-d="${it.d}"><div class="ico ${it.d?'dir':''}">${it.d?'📁':(ICON[e]||'📄')}</div>
+      <div class="meta"><div class="n">${esc(it.n)}</div><div class="s">${it.d?'Folder':fmt(it.s)}</div></div><button class="more">⋯</button></div>`}).join('')}
+$('#files').addEventListener('click',e=>{const row=e.target.closest('.row');if(!row)return;const p=row.dataset.p,d=row.dataset.d==='1';
+  if(e.target.classList.contains('more'))return fileMenu(p,d);
+  d?loadFiles(p):openFile(p)});
+function sheet(html){$('#sheet').innerHTML=html;$('#sheetBg').classList.add('on')}
+function closeSheet(){$('#sheetBg').classList.remove('on');$('#sheet').innerHTML=''}
+function fileMenu(p,d){const n=p.split('/').pop();
+  sheet(`<h4>${esc(n)}</h4>${d?'':`<button class="opt" data-a="open">Open</button><button class="opt" data-a="dl">Download</button>`}
+  <button class="opt" data-a="ren">Rename</button><button class="opt" data-a="del" style="color:var(--bad)">Delete${d?' folder and everything in it':''}</button><button class="opt" data-a="x">Cancel</button>`);
+  $('#sheet').onclick=async ev=>{const a=ev.target.dataset.a;if(!a)return;closeSheet();
+    if(a==='open')openFile(p);
+    if(a==='dl'){const l=document.createElement('a');l.href=fileURL(p,1);l.download=n;document.body.appendChild(l);l.click();l.remove()}
+    if(a==='ren'){const nn=prompt('New name',n);if(!nn||nn===n)return;try{await post('/api/rename',{from:p,to:p.slice(0,p.length-n.length)+nn});loadFiles()}catch(e){toast(e.message)}}
+    if(a==='del'){if(!confirm('Delete "'+n+'"?'))return;try{await post('/api/delete',{path:p});toast('Deleted');loadFiles();loadInfo()}catch(e){toast(e.message)}}}}
+async function openFile(p){const e=ext(p),n=p.split('/').pop(),u=fileURL(p);
+  if(['mp3','m4a','wav','flac','aac','ogg','opus'].includes(e)){await loadMusic(true);const i=MUSIC.findIndex(m=>m.p===p);
+    if(i>=0)return playFrom(MUSIC.filter(m=>m.f===MUSIC[i].f),MUSIC[i]);return playFrom([{p,t:n,f:''}],{p,t:n,f:''})}
+  if(['jpg','jpeg','png','gif','webp','svg','heic'].includes(e))return sheet(`<h4>${esc(n)}</h4><img src="${u}" alt=""><a class="opt" href="${fileURL(p,1)}" download>Download</a>`);
+  if(['mp4','mov','m4v'].includes(e))return sheet(`<h4>${esc(n)}</h4><video src="${u}" controls playsinline></video>`);
+  if(['txt','md','json','log','ini','cfg','csv'].includes(e)){const t=await (await fetch(u)).text();return sheet(`<h4>${esc(n)}</h4><pre>${esc(t.slice(0,200000))}</pre>`)}
+  location.href=u}
+async function newFolder(){const n=prompt('Folder name');if(!n)return;try{await post('/api/mkdir',{path:(cwd==='/'?'':cwd)+'/'+n});loadFiles()}catch(e){toast(e.message)}}
+
+// uploads (one at a time keeps the little board happy)
+$('#pick').onchange=e=>{upload([...e.target.files]);e.target.value=''};
+const fv=$('#v-files');
+['dragenter','dragover'].forEach(t=>fv.addEventListener(t,e=>{e.preventDefault();fv.classList.add('drop')}));
+['dragleave','drop'].forEach(t=>fv.addEventListener(t,e=>{e.preventDefault();fv.classList.remove('drop')}));
+fv.addEventListener('drop',e=>{if(e.dataTransfer.files.length)upload([...e.dataTransfer.files])});
+async function upload(files){if(!files.length)return;const box=$('#uploads');box.classList.add('on');const dir=cwd;let done=0,fail=0;
+  for(const f of files){$('#upName').textContent=f.name;$('#upCount').textContent=(done+1)+' of '+files.length;
+    try{await sendOne(f,dir)}catch(e){fail++;toast(f.name+': '+e.message)}done++}
+  box.classList.remove('on');toast(fail?`${done-fail} uploaded, ${fail} failed`:`${done} file${done>1?'s':''} uploaded`);loadFiles();loadInfo()}
+function sendOne(f,dir){return new Promise((ok,bad)=>{const x=new XMLHttpRequest(),t0=Date.now();
+  x.open('POST','/api/upload?dir='+encodeURIComponent(dir));
+  x.upload.onprogress=e=>{if(!e.lengthComputable)return;$('#upBar').style.width=(e.loaded/e.total*100)+'%';const s=e.loaded/((Date.now()-t0)/1000||1);$('#upSpeed').textContent=fmt(s)+'/s'};
+  x.onload=()=>{let j={};try{j=JSON.parse(x.responseText)}catch(e){}x.status<300&&j.ok!==false?ok():bad(new Error(j.error||'failed'))};
+  x.onerror=()=>bad(new Error('connection lost'));const fd=new FormData();fd.append('file',f,f.name);x.send(fd)})}
+
+// ---------- music ----------
+let musicLoaded=0;
+async function loadMusic(quiet){if(Date.now()-musicLoaded<4000&&MUSIC.length)return renderMusic();
+  try{MUSIC=await (await fetch('/api/music')).json();musicLoaded=Date.now()}catch(e){if(!quiet)toast('Could not load music')}renderMusic()}
+function renderMusic(){if(!$('#v-music').classList.contains('on'))return;const q=$('#q').value.trim().toLowerCase();
+  const list=MUSIC.filter(m=>!q||m.t.toLowerCase().includes(q)||m.f.toLowerCase().includes(q));
+  if(!MUSIC.length){$('#music').innerHTML=`<div class="empty">${INFO.scanning?'Looking for songs…':'No songs yet.<br>Upload MP3s in the <b>Files</b> tab. Folders become albums.'}</div>`;return}
+  if(!list.length){$('#music').innerHTML='<div class="empty">No matches.</div>';return}
+  const groups={};list.forEach(m=>(groups[m.f||'Loose songs']=groups[m.f||'Loose songs']||[]).push(m));
+  const cur=OUT==='spk'?SPK.path:(Q[QI]||{}).p;
+  $('#music').innerHTML=Object.keys(groups).sort().map(g=>`<div class="group">${esc(g)} · ${groups[g].length}</div><div class="list">`+
+    groups[g].map(m=>`<div class="row track ${m.p===cur?'now':''}" data-p="${esc(m.p)}"><div class="ico">${m.p===cur?'🔊':'♪'}</div><div class="meta"><div class="n">${esc(m.t)}</div><div class="s">${fmt(m.s)}${OUT==='spk'&&!m.spk?' · phone only':''}</div></div></div>`).join('')+'</div>').join('')}
+$('#q').addEventListener('input',renderMusic);
+$('#music').addEventListener('click',e=>{const row=e.target.closest('.track');if(!row)return;const m=MUSIC.find(x=>x.p===row.dataset.p);if(!m)return;
+  const q=$('#q').value.trim().toLowerCase();
+  const list=q?MUSIC.filter(x=>x.t.toLowerCase().includes(q)||x.f.toLowerCase().includes(q)):MUSIC.filter(x=>x.f===m.f);playFrom(list,m)});
+
+function setOut(o){OUT=o;document.querySelectorAll('#outSeg button').forEach(b=>b.classList.toggle('on',b.dataset.out===o));
+  if(o==='spk'){audio.pause();pollSpk()}showPlayer();renderMusic()}
+
+const audio=$('#audio');
+function playFrom(list,m){
+  if(OUT==='spk'){if(!m.spk&&m.spk!==undefined)return toast('The speaker plays MP3 and WAV. Switch to "This device" for this one.');
+    spk('play',{path:m.p});return}
+  Q=list;QI=list.indexOf(m);if(QI<0){Q=[m];QI=0}playIdx()}
+function playIdx(){const m=Q[QI];if(!m)return;audio.src=fileURL(m.p);audio.play().catch(()=>{});showPlayer();renderMusic();
+  if('mediaSession' in navigator){navigator.mediaSession.metadata=new MediaMetadata({title:m.t,album:m.f||'The Shelf',artist:'The Shelf',artwork:[{src:'/icon.png',sizes:'180x180',type:'image/png'}]})}}
+function next(){if(OUT==='spk')return spk('next');if(QI<Q.length-1){QI++;playIdx()}}
+function prev(){if(OUT==='spk')return spk('prev');if(audio.currentTime>4){audio.currentTime=0;return}if(QI>0){QI--;playIdx()}}
+function toggle(){if(OUT==='spk')return spk(SPK.state===1?'pause':SPK.state===2?'resume':'stop');if(!audio.src)return;audio.paused?audio.play():audio.pause()}
+audio.addEventListener('ended',()=>{if(QI<Q.length-1){QI++;playIdx()}else{showPlayer()}});
+audio.addEventListener('play',showPlayer);audio.addEventListener('pause',showPlayer);
+audio.addEventListener('error',()=>{if(audio.src)toast("This browser can't play that file")});
+audio.addEventListener('timeupdate',()=>{$('#plBar').style.width=(audio.duration?audio.currentTime/audio.duration*100:0)+'%';$('#tCur').textContent=tm(audio.currentTime);$('#tDur').textContent=tm(audio.duration)});
+if('mediaSession' in navigator){const ms=navigator.mediaSession;ms.setActionHandler('play',()=>audio.play());ms.setActionHandler('pause',()=>audio.pause());
+  ms.setActionHandler('nexttrack',next);ms.setActionHandler('previoustrack',prev);try{ms.setActionHandler('seekto',d=>{audio.currentTime=d.seekTime})}catch(e){}}
+const seekEl=$('#seek');function seekAt(x){const r=seekEl.getBoundingClientRect();if(audio.duration)audio.currentTime=Math.max(0,Math.min(1,(x-r.left)/r.width))*audio.duration}
+seekEl.addEventListener('pointerdown',e=>{seekAt(e.clientX);seekEl.setPointerCapture(e.pointerId)});seekEl.addEventListener('pointermove',e=>{if(e.buttons)seekAt(e.clientX)});
+
+function showPlayer(){const p=$('#player');
+  if(OUT==='spk'){const on=SPK.state>0;p.classList.toggle('on',on);$('#plPhone').style.display='none';$('#plSpk').style.display='flex';
+    $('#plTitle').textContent=SPK.title||'—';$('#plSub').textContent=SPK.state===2?'Paused on the Shelf speaker':'Playing on the Shelf speaker';$('#plIco').textContent='🔊';
+    $('#plPlay').textContent=SPK.state===1?'⏸':'▶';if(document.activeElement!==$('#vol'))$('#vol').value=SPK.vol}
+  else{const m=Q[QI];p.classList.toggle('on',!!m);$('#plPhone').style.display='block';$('#plSpk').style.display='none';if(!m)return;
+    $('#plTitle').textContent=m.t;$('#plSub').textContent=(m.f||'The Shelf')+' · '+(QI+1)+' of '+Q.length;$('#plIco').textContent='♪';$('#plPlay').textContent=audio.paused?'▶':'⏸'}}
+
+async function spk(cmd,extra){try{await post('/api/speaker',Object.assign({cmd},extra||{}));setTimeout(pollSpk,350)}catch(e){toast(e.message)}}
+async function pollSpk(){try{SPK=await api('/api/speaker')}catch(e){return}if(OUT==='spk'){showPlayer();renderMusic()}}
+$('#vol').addEventListener('input',e=>{clearTimeout(e.target._t);e.target._t=setTimeout(()=>post('/api/speaker',{vol:e.target.value}),150)});
+
+// ---------- board ----------
+let BOARD=[];
+async function loadBoard(){try{BOARD=await (await fetch('/api/board')).json()}catch(e){BOARD=[]}renderBoard()}
+const linkify=t=>esc(t).replace(/(https?:\/\/[^\s<]+)/g,'<a href="$1" target="_blank" rel="noopener">$1</a>');
+function renderBoard(){if(!BOARD.length){$('#cards').innerHTML='<div class="empty" style="grid-column:1/-1">Your board is empty. Pin notes, shopping lists, or links for everyone at home.</div>';return}
+  $('#cards').innerHTML=BOARD.slice().sort((a,b)=>b.ts-a.ts).map(n=>`<div class="note"><button class="x" data-id="${n.id}">×</button>${n.title?`<h3>${esc(n.title)}</h3>`:''}<p>${linkify(n.text||'')}</p><div class="when">${new Date(n.ts).toLocaleString()}</div></div>`).join('')}
+$('#cards').addEventListener('click',async e=>{const id=e.target.dataset.id;if(!id)return;if(!confirm('Remove this note?'))return;
+  await loadBoard();BOARD=BOARD.filter(n=>String(n.id)!==id);await saveBoard()});
+async function saveBoard(){try{await api('/api/board',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(BOARD)})}catch(e){toast(e.message)}renderBoard()}
+async function addNote(){const title=$('#nTitle').value.trim(),text=$('#nText').value.trim();if(!title&&!text)return;
+  await loadBoard();BOARD.push({id:Date.now()+''+Math.floor(Math.random()*1e3),title,text,ts:Date.now()});$('#nTitle').value='';$('#nText').value='';await saveBoard();toast('Pinned')}
+
+// ---------- device ----------
+async function scan(){const box=$('#nets');box.style.display='block';box.innerHTML='<div class="empty">Looking for networks…</div>';
+  for(let i=0;i<25;i++){let j;try{j=await api('/api/wifi/scan')}catch(e){break}
+    if(!j.scanning){const seen={};const nets=j.nets.filter(n=>n.ssid&&!seen[n.ssid]&&(seen[n.ssid]=1)).sort((a,b)=>b.rssi-a.rssi);
+      box.innerHTML=nets.length?nets.map(n=>`<button class="net" data-s="${esc(n.ssid)}" data-l="${n.lock}"><span>${n.lock?'🔒 ':''}${esc(n.ssid)}</span><span>${n.rssi} dBm</span></button>`).join(''):'<div class="empty">No networks found.</div>';return}
+    await new Promise(r=>setTimeout(r,800))}box.innerHTML='<div class="empty">Scan failed. Try again.</div>'}
+$('#nets').addEventListener('click',async e=>{const b=e.target.closest('.net');if(!b)return;const ssid=b.dataset.s;let pass='';
+  if(b.dataset.l==='1'){pass=prompt('Password for '+ssid);if(pass===null)return}
+  try{await post('/api/wifi',{ssid,pass});sheet(`<h4>Joining ${esc(ssid)}…</h4><p class="tip">The Shelf is restarting. Switch your phone back to <b>${esc(ssid)}</b>, then open<br><b>http://${esc(INFO.host)}.local</b><br>or the address shown on the board's screen.</p><button class="opt" onclick="closeSheet()">OK</button>`)}catch(err){toast(err.message)}});
+async function forget(){if(!confirm('Forget the Wi-Fi network? The Shelf will restart in setup mode ('+INFO.apName+').'))return;try{await post('/api/wifi/forget');toast('Restarting in setup mode')}catch(e){toast(e.message)}}
+async function saveHost(){const h=$('#hostIn').value.trim();if(!h)return;try{const j=await post('/api/settings',{host:h});if(j.restart)sheet(`<h4>Renamed</h4><p class="tip">Restarting. Find it next at <b>http://${esc(h.toLowerCase().replace(/[^a-z0-9-]/g,'-'))}.local</b></p><button class="opt" onclick="closeSheet()">OK</button>`)}catch(e){toast(e.message)}}
+async function saveSpk(){try{await post('/api/settings',{speaker:$('#spkOn').checked?1:0});await loadInfo();toast($('#spkOn').checked?'Speaker on: pick it in the Music tab':'Speaker off')}catch(e){toast(e.message)}}
+async function rescan(){await post('/api/rescan');musicLoaded=0;toast('Rescanning music…');setTimeout(loadInfo,4000)}
+async function reboot(){if(!confirm('Restart the Shelf?'))return;await post('/api/reboot');toast('Restarting… give it 15 seconds')}
+
+// ---------- start ----------
+let startTab='files';try{startTab=localStorage.getItem('tab')||'files'}catch(e){}
+loadInfo().then(()=>{loadFiles('/');go(startTab)});
+setInterval(loadInfo,15000);
+setInterval(()=>{if(OUT==='spk'||$('#v-music').classList.contains('on'))pollSpk()},2500);
+</script>
+</body>
+</html>

@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Heltec Shelf Lite</title>
+<meta name="description" content="Install The Shelf Lite on a Heltec WiFi LoRa 32 V3 or V4 from your browser.">
+<link rel="icon" href="icon.png">
+<script type="module" src="https://unpkg.com/esp-web-tools@10.1.1/dist/web/install-button.js?module"></script>
+<style>
+:root{--bg:#16130f;--card:#221d17;--line:#3a3229;--ink:#f3ebdf;--mute:#a99c8a;--accent:#e8a33d;--accent2:#c9772b;
+  font-family:ui-rounded,-apple-system,"SF Pro Rounded",system-ui,"Segoe UI",Roboto,sans-serif;color-scheme:dark}
+@media (prefers-color-scheme: light){:root:not([data-theme="dark"]){--bg:#f6f0e6;--card:#fffaf2;--line:#e0d4c2;--ink:#2b241c;--mute:#7d6f5d;--accent:#c97a14;--accent2:#a85d0c;color-scheme:light}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);line-height:1.55}
+.wrap{max-width:860px;margin:0 auto;padding:32px 16px 64px}
+.hero{display:flex;gap:18px;align-items:center;margin-bottom:8px}
+.hero img{width:76px;height:76px;border-radius:18px;flex:none}
+h1{margin:0;font-size:32px;line-height:1.1}
+h1 b{color:var(--accent)}
+.sub{color:var(--mute);margin:6px 0 0}
+h2{font-size:21px;margin:40px 0 12px}
+h3{font-size:16px;margin:0 0 8px}
+p{margin:0 0 12px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px}
+.card .tag{display:inline-block;font-size:12px;font-weight:700;color:#1b1207;background:var(--accent);border-radius:999px;padding:2px 9px;margin-bottom:8px}
+.card small{color:var(--mute);display:block;margin-top:10px;font-size:13px}
+esp-web-install-button button,.btn{font:inherit;font-weight:700;background:var(--accent);color:#1b1207;border:0;border-radius:999px;padding:11px 20px;cursor:pointer;font-size:15px}
+.warn{border-left:4px solid var(--accent);background:var(--card);padding:12px 14px;border-radius:0 12px 12px 0;margin:14px 0;font-size:15px}
+table{width:100%;border-collapse:collapse;font-size:15px;background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line)}
+th{color:var(--mute);font-weight:600;font-size:13px}
+tr:last-child td{border-bottom:0}
+code{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:1px 6px;font-size:.92em}
+ol{padding-left:22px}ol li{margin-bottom:8px}
+.muted{color:var(--mute);font-size:14px}
+a{color:var(--accent)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hero">
+    <img src="icon.png" alt="">
+    <div>
+      <h1>The <b>Shelf</b> Lite</h1>
+      <p class="sub">The Shelf, shrunk onto a Heltec LoRa board. It's a Wi-Fi file hub on a microSD card, with a music player for your phone or a little speaker.</p>
+    </div>
+  </div>
+
+  <h2>1. Install it</h2>
+  <p>Plug the board into this computer with a USB-C <i>data</i> cable, pick your board, then choose the serial port when Chrome asks. This works in Chrome or Edge on a PC, Mac or Raspberry Pi.</p>
+  <div class="warn">Installing Shelf Lite replaces whatever is on the board, Meshtastic included. You can put Meshtastic back any time from <a href="https://flasher.meshtastic.org">flasher.meshtastic.org</a>.</div>
+  <div class="grid">
+    <div class="card">
+      <span class="tag">Heltec V3</span>
+      <h3>WiFi LoRa 32 V3</h3>
+      <esp-web-install-button manifest="manifest-v3.json">
+        <button slot="activate">Install on V3</button>
+        <span slot="unsupported" class="muted">Open this page in Chrome or Edge to install.</span>
+        <span slot="not-allowed" class="muted">This page has to be opened over https.</span>
+      </esp-web-install-button>
+      <small>8 MB flash. With no card fitted it keeps about 5.9 MB of files on the board.</small>
+    </div>
+    <div class="card">
+      <span class="tag">Heltec V4</span>
+      <h3>WiFi LoRa 32 V4 / V4-R8</h3>
+      <esp-web-install-button manifest="manifest-v4.json">
+        <button slot="activate">Install on V4</button>
+        <span slot="unsupported" class="muted">Open this page in Chrome or Edge to install.</span>
+        <span slot="not-allowed" class="muted">This page has to be opened over https.</span>
+      </esp-web-install-button>
+      <small>16 MB flash. With no card fitted it keeps about 13.9 MB on the board. Works on both the 2 MB and 8 MB PSRAM versions.</small>
+    </div>
+  </div>
+  <p class="muted" style="margin-top:10px">No port listed? On the V3, hold <b>PRG</b>, tap <b>RST</b>, let go of PRG and try again. The V4 shows up right away. On Windows the V3 may need the free CP210x USB driver.</p>
+
+  <h2>2. Wire it up</h2>
+  <p>One wiring plan works on the V3 and the V4. The pins stay clear of the LoRa radio, the screen, and the V4's high-power amplifier pins.</p>
+  <div class="warn">Go by the pin labels printed on the board. GPIO 47 and 48 are on the <b>other</b> header row from 4, 6, 38, 39 and 41, so the SD module's wires go to both sides of the board.</div>
+  <div class="grid">
+    <div>
+      <h3>microSD module</h3>
+      <table>
+        <tr><th>Module pin</th><th>Heltec pin</th></tr>
+        <tr><td>VCC</td><td><b>3V3</b> (not Ve)</td></tr>
+        <tr><td>GND</td><td>GND</td></tr>
+        <tr><td>CS</td><td>GPIO 4</td></tr>
+        <tr><td>MISO</td><td>GPIO 6</td></tr>
+        <tr><td>SCK</td><td>GPIO 47</td></tr>
+        <tr><td>MOSI</td><td>GPIO 48</td></tr>
+      </table>
+    </div>
+    <div>
+      <h3>MAX98357A speaker amp (optional)</h3>
+      <table>
+        <tr><th>Amp pin</th><th>Heltec pin</th></tr>
+        <tr><td>VIN</td><td>3V3, or 5V for louder (on USB power)</td></tr>
+        <tr><td>GND</td><td>GND</td></tr>
+        <tr><td>BCLK</td><td>GPIO 39</td></tr>
+        <tr><td>LRC</td><td>GPIO 41</td></tr>
+        <tr><td>DIN</td><td>GPIO 38</td></tr>
+        <tr><td>+ / −</td><td>a 4–8 Ω, 3 W speaker</td></tr>
+      </table>
+    </div>
+  </div>
+  <p class="muted" style="margin-top:10px">Keep the SD wires under 10 cm. Use a FAT32 card: 32 GB cards come that way. Bigger cards need reformatting to FAT32 first (on Windows, use a tool like guiformat). With no card fitted, Shelf Lite uses the board's own flash instead.</p>
+
+  <h2>3. Connect it to your Wi-Fi</h2>
+  <ol>
+    <li>Power the board. The screen shows <b>Join Shelf-Lite-XXXX</b>.</li>
+    <li>On your phone, join that Wi-Fi network. The password is <code>shelflite</code>. A setup page pops up; if it doesn't, open <code>http://192.168.4.1</code>.</li>
+    <li>Go to <b>Device → Find networks</b>, tap your home Wi-Fi and type its password. The board restarts.</li>
+    <li>Put your phone back on your home Wi-Fi. Open the address on the board's screen, or <code>http://shelf-xxxx.local</code>.</li>
+    <li>On iPhone, tap Share → <b>Add to Home Screen</b> to get a Shelf icon.</li>
+  </ol>
+  <p class="muted">Hold the PRG button for 6 seconds to forget the Wi-Fi and go back to setup mode. A short press skips to the next song on the speaker, or wakes the screen.</p>
+
+  <h2>What it does</h2>
+  <div class="grid">
+    <div class="card"><h3>📁 Files</h3><p class="muted">Upload from your phone or PC, make folders, rename, delete, download. Photos, videos and text open right in the page.</p></div>
+    <div class="card"><h3>🎵 Music</h3><p class="muted">Folders become albums. Play on your phone (lock-screen controls work) or on the Shelf speaker, with volume control.</p></div>
+    <div class="card"><h3>📌 Board</h3><p class="muted">A shared board of notes and links for everyone on the home Wi-Fi.</p></div>
+    <div class="card"><h3>📟 Screen</h3><p class="muted">Shows the address, free space and the song that's playing. Sleeps after 5 minutes to save the OLED.</p></div>
+  </div>
+
+  <p class="muted" style="margin-top:36px">Source and build notes: <a href="https://github.com/hardwaremack-prog/Heltec-Shelf-Lite">github.com/hardwaremack-prog/Heltec-Shelf-Lite</a></p>
+</div>
+</body>
+</html>

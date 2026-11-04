@@ -1,0 +1,5 @@
+build/
+mock-shelf/
+HeltecShelfLite/partitions.csv
+__pycache__/
+*.pyc
