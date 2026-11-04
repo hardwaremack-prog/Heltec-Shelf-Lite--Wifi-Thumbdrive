@@ -1,6 +1,6 @@
 <p align="center"><img src="docs/icon.png" width="96" alt=""></p>
 
-# Heltec Shelf Lite
+# Heltec Shelf Lite: Wi-Fi Thumbdrive
 
 **The Shelf, shrunk onto a Heltec WiFi LoRa 32 V3 or V4.** Plug a microSD card into a $3 module and the board becomes a little Wi-Fi file hub for your home. Open it in a browser on any phone or PC to upload, browse and download files, play your music, and pin notes and links for the family.
 
@@ -10,7 +10,7 @@
 - 📟 **OLED**: shows the board's address, free space and the song that's playing.
 - 📱 **iPhone-friendly**: Add to Home Screen and it opens like an app.
 
-### ➡️ Install from your browser: **https://hardwaremack-prog.github.io/Heltec-Shelf-Lite/**
+### ➡️ Install from your browser: **https://hardwaremack-prog.github.io/Heltec-Shelf-Lite--Wifi-Thumbdrive/**
 
 > Installing Shelf Lite replaces Meshtastic on that board. You can put Meshtastic back any time from [flasher.meshtastic.org](https://flasher.meshtastic.org).
 
@@ -60,7 +60,7 @@ One wiring plan works on the V3 and the V4. The pins avoid the LoRa radio (GPIO 
 
 ## First-time setup
 
-1. **Install** with the [web installer](https://hardwaremack-prog.github.io/Heltec-Shelf-Lite/) (Chrome or Edge on a PC, Mac or Pi).
+1. **Install** with the [web installer](https://hardwaremack-prog.github.io/Heltec-Shelf-Lite--Wifi-Thumbdrive/) (Chrome or Edge on a PC, Mac or Pi).
 2. Power the board. The screen shows **Join Shelf-Lite-XXXX**.
 3. On your phone, join that network. The password is **`shelflite`**. A setup page pops up; if it doesn't, open `http://192.168.4.1`.
 4. Go to **Device → Find networks**, tap your home Wi-Fi and enter its password. The board restarts.
